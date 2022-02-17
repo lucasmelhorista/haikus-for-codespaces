@@ -1,7 +1,7 @@
 ### Transformação BOX-COX 
 
 
-## Pocotes utilizados nesta análise
+## Pacotes utilizados nesta análise
 
 library("nortest")
 library("fpp")
