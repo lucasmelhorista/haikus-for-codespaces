@@ -1,0 +1,66 @@
+### Transformação BOX-COX 
+
+
+## Pocotes utilizados nesta análise
+
+library("nortest")
+library("fpp")
+library("car")
+
+## Obtenção do banco de dados
+
+remove(list=ls()) ## Limpar o ambiente global
+
+dados <- read_excel("Dados_quanti.xlsx")
+
+## Separando a coluna que precisa de transformação
+
+dados <- data.frame(dados$NP, dados$GEN)
+glimpse(dados)
+
+dados <- edit(dados) ## Editando os nomes das colunas
+
+dados$GEN <- as.factor(dados$GEN)
+is.numeric(dados$GEN)
+
+## dados <- (dados, rm.na = T) # remove os dados faltantes (NA)
+
+## Teste de normalidade e homocedasticidade
+attach(dados) ### Acessa as colunas isoladamente
+boxplot(NP ~ GEN,col=c(3,4,6,7,8), boxwex=0.4,ylab="Número de perfilhos", xlab="Genótipos")
+shapiro.test(NP) ## Normalidade
+fligner.test(NP ~ GEN) ## Homocedasticidade
+
+## Pacote CAR
+np <- aov(NP ~ GEN) ## Modelo Linear
+qqp(rstandard(np),"norm") ## visualização dos resíduos
+
+anova(np)
+?qqp
+
+## Transformação BOX-COX - pacote (fpp)
+lambda <- BoxCox.lambda(NP,method=c("loglik"),lower=-3,upper=3) ## Valor de Lambda
+lambda ## É o valor da potência
+dt <- BoxCox(NP,lambda) ## Dados transformados com Box-Cox
+dt # Variável transformada com Box-Cox
+
+## verificando se a transformação levou à normalidade
+np2 <- aov(dt ~ GEN) ## Modelo Linear com Box-Cox
+qqp(rstandard(np2),"norm") ## Visualização dos resíduos
+shapiro.test (dt)
+ad.test (dt) # Ativar pacote "nortest"
+lillie.test (dt)
+sf.test (dt)
+fligner.test(dt ~ GEN)
+bartlett.test(dt ~ GEN)
+anova(np2)
+#===============================================================================
+## Função densidade de probabilidade
+
+NP <- densityMclust(dt)
+plot(NP, what = "density", data = dt)
+
+
+NP <- densityMclust(dados$NP)
+plot(NP, what = "density", data = dados$NP)
+
